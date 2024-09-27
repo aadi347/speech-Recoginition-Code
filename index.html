@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition Example</title>
+</head>
+<body>
+    <h1>Speech Recognition Example</h1>
+    <button id="start-recognition">Start Recognition</button>
+    <p id="output"></p>
+    <p id="delay"></p>
+
+    <script>
+        // Check for browser compatibility with Web Speech API
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Your browser does not support speech recognition.');
+        } else {
+            const recognizer = new SpeechRecognition();
+            recognizer.lang = 'en-US';  // Set language
+            recognizer.interimResults = false;  // Wait for complete phrases
+
+            const startButton = document.getElementById('start-recognition');
+            const outputText = document.getElementById('output');
+            const delayDisplay = document.getElementById('delay');
+            
+            startButton.addEventListener('click', () => {
+                outputText.textContent = 'Please speak something...';
+                
+                // Record the time when speech recognition starts
+                const startTime = performance.now();
+                
+                recognizer.start();
+
+                recognizer.onresult = (event) => {
+                    // Get the recognized text
+                    const text = event.results[0][0].transcript;
+
+                    // Measure the delay
+                    const delay = (performance.now() - startTime) / 1000;
+
+                    outputText.textContent = `You said: ${text}`;
+                    delayDisplay.textContent = `Delay: ${delay.toFixed(2)} seconds`;
+                };
+
+                recognizer.onerror = (event) => {
+                    if (event.error === 'no-speech') {
+                        outputText.textContent = 'No speech detected. Please try again.';
+                    } else {
+                        outputText.textContent = `Error: ${event.error}`;
+                    }
+                };
+
+                recognizer.onaudioend = () => {
+                    outputText.textContent += '\nSpeech recognition ended.';
+                };
+            });
+        }
+    </script>
+</body>
+</html>
